@@ -1,0 +1,121 @@
+<!-- FILEPATH: index.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Button Toggle</title>
+  <style>
+    .container {
+      text-align: center;
+      margin-top: 100px;
+    }
+    .button {
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    .text-field {
+      margin-top: 20px;
+      padding: 10px;
+      font-size: 16px;
+      width: 300px;
+    }
+    .elapsed-time {
+      margin-top: 20px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <button id="toggleButton" class="button">Start</button>
+    <input id="textField" class="text-field" type="text" readonly>
+    <div id="elapsedTime" class="elapsed-time"></div>
+  </div>
+
+  <script>
+    // Get the button, text field, and elapsed time elements
+    const toggleButton = document.getElementById('toggleButton');
+    const textField = document.getElementById('textField');
+    const elapsedTime = document.getElementById('elapsedTime');
+
+    let timerId; // Variable to store the timer ID
+    let startTime; // Variable to store the start time
+    let lastTwoStrings = []; // Queue to store the last two strings
+
+    // Function to choose a string at random from an array
+    function chooseRandomString(strings) {
+      return strings[Math.floor(Math.random() * strings.length)];
+    }
+
+    // Function to concatenate two strings returned from chooseRandomString. If 'SS1' is chosen, then 'R/5' should not be chosen. If 'SS2' is chosen, then 'R/1' should not be chosen.
+    function concatenateTwoStrings() {
+      const stringSet = ['SS1', 'SS2'];
+      const roots = ['R/1', 'R/2', 'R/3', 'R/4', 'R/5'];
+
+      let chosenString, chosenRoot;
+      do {
+        chosenString = chooseRandomString(stringSet);
+        chosenRoot = chooseRandomString(roots);
+
+        if (chosenString === 'SS1' && chosenRoot === 'R/5') {
+          chosenRoot = 'R/4';
+        } else if (chosenString === 'SS2' && chosenRoot === 'R/1') {
+          chosenRoot = 'R/2';
+        }
+      } while (lastTwoStrings.includes(chosenString + ' ' + chosenRoot));
+
+      // Update the queue of the last two strings
+      if (lastTwoStrings.length >= 2) {
+        lastTwoStrings.shift();
+      }
+      lastTwoStrings.push(chosenString + ' ' + chosenRoot);
+
+      return chosenString + ' ' + chosenRoot;
+    }
+
+    // Function to start the timer
+    function startTimer() {
+      startTime = new Date().getTime();
+      timerId = setInterval(updateElapsedTime, 1000);
+    }
+
+    // Function to update the elapsed time
+    function updateElapsedTime() {
+      const currentTime = new Date().getTime();
+      const elapsedTimeInSeconds = Math.floor((currentTime - startTime) / 1000);
+      elapsedTime.textContent = `Elapsed Time: ${elapsedTimeInSeconds} seconds`;
+    }
+
+    // Function to stop the timer
+    function stopTimer() {
+      clearInterval(timerId);
+    }
+
+    // Function to handle the button click event
+    function handleButtonClick() {
+      if (toggleButton.textContent === 'Start') {
+        toggleButton.textContent = 'Stop';
+        textField.value = concatenateTwoStrings();
+        startTimer();
+      } else if (toggleButton.textContent === 'Stop') {
+        toggleButton.textContent = 'Start';
+        stopTimer();
+        const currentTime = new Date().getTime();
+        const elapsedTimeInSeconds = Math.floor((currentTime - startTime) / 1000);
+        elapsedTime.textContent = `Total Elapsed Time: ${elapsedTimeInSeconds} seconds`;
+      }
+    }
+
+    // Attach the handleButtonClick function to the button click event
+    toggleButton.addEventListener('click', handleButtonClick);
+
+    // Attach an event listener for the 'keydown' event to the document
+    document.addEventListener('keydown', function(event) {
+      // If the pressed key is the spacebar, toggle the button
+      if (event.keyCode === 32) {
+        handleButtonClick();
+      }
+    });
+  </script>
+</body>
+</html>
