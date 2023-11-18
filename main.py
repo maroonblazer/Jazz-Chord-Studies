@@ -9,7 +9,7 @@ class StringDisplayTimer:
         self.stringSet = ["SS1", "SS2"]
         self.root = ["R/1", "R/2", "R/3", "R/4", "R/5"]
         self.lastTwoOutputs = []
-        self.maxTimeLimit = 15  # seconds
+        self.maxTimeLimit = 30  # seconds
         self.userInputWaitTime = 60  # seconds
         self.running = True
         self.waiting_for_key = True
