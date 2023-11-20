@@ -35,14 +35,21 @@
 </head>
 <body>
   <div class="container">
-    <button id="toggleButton" class="button">Start</button>
+    <button id="sessionButton" class="button">Begin</button>
+    <button id="startButton" class="button">Start</button>
     <input id="textField" class="text-field" type="text" readonly>
     <div id="elapsedTime" class="elapsed-time"></div>
   </div>
 
   <script>
+    let isSessionRunning = false;
+    let sessionCount = 0; // Variable to store the session count
+    const maxSessionCount = 3; // Maximum number of iterations for a session
+
     // Get the button, text field, and elapsed time elements
-    const toggleButton = document.getElementById('toggleButton');
+    const sessionButton = document.getElementById('sessionButton');
+    const startButton = document.getElementById('startButton');
+    startButton.disabled = true; // disable the Start button
     const textField = document.getElementById('textField');
     const elapsedTime = document.getElementById('elapsedTime');
 
@@ -99,31 +106,57 @@
       clearInterval(timerId);
     }
 
+    function handleSpacebarEvent(event) {
+       if (event.keyCode === 32) { // Check if the pressed key is the spacebar5
+        handleStartButtonClick();
+  }
+}
+
+    // Function to handle the session button click event
+    function handleSessionButtonClick() {
+      if (sessionButton.textContent === 'Begin') {
+        sessionButton.textContent = 'End';
+        // Code to start a session goes here
+        console.log('Session started!');
+        isSessionRunning = true;
+        startButton.disabled = false; // enable the Start button
+        document.addEventListener('keydown', handleSpacebarEvent);
+      } else if (sessionButton.textContent === 'End') {
+        sessionButton.textContent = 'Begin';
+        // Code to end a session goes here
+        console.log('Session ended!');
+        startButton.disabled = true; // disable the Start button
+        isSessionRunning = false;
+        document.removeEventListener('keydown', handleSpacebarEvent);
+      }
+    }
+
     // Function to handle the button click event
-    function handleButtonClick() {
-      if (toggleButton.textContent === 'Start') {
-        toggleButton.textContent = 'Stop';
+    function handleStartButtonClick() {
+      if (startButton.textContent === 'Start') {
+        startButton.textContent = 'Stop';
         textField.value = concatenateTwoStrings();
         startTimer();
-      } else if (toggleButton.textContent === 'Stop') {
-        toggleButton.textContent = 'Start';
+      } else if (startButton.textContent === 'Stop') {
+        startButton.textContent = 'Start';
         stopTimer();
         const currentTime = new Date().getTime();
         const elapsedTimeInSeconds = Math.floor((currentTime - startTime) / 1000);
         elapsedTime.textContent = `Total Elapsed Time: ${elapsedTimeInSeconds} seconds`;
+        sessionCount++;
+      if (sessionCount >= maxSessionCount) {
+        sessionCount = 0;
+      }
       }
     }
 
-    // Attach the handleButtonClick function to the button click event
-    toggleButton.addEventListener('click', handleButtonClick);
 
-    // Attach an event listener for the 'keydown' event to the document
-    document.addEventListener('keydown', function(event) {
-      // If the pressed key is the spacebar, toggle the button
-      if (event.keyCode === 32) {
-        handleButtonClick();
-      }
-    });
+// Attach the handleSessionButtonClick function to the button click event
+sessionButton.addEventListener('click', handleSessionButtonClick);
+
+    // Attach the handleButtonClick function to the button click event
+    startButton.addEventListener('click', handleStartButtonClick);
+
   </script>
 </body>
 </html>
