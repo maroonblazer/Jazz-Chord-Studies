@@ -31,6 +31,19 @@
       text-align: left;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
+
+    /* Style the table so that the data for each column is center-aligned under each column heading */
+    table {
+      border-collapse: collapse;
+      width: 15%;
+    }
+    th, td {
+      text-align: center;
+      padding: 8px;
+    }
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
   </style>
 </head>
 <body>
@@ -42,6 +55,7 @@
   </div>
 
   <script>
+    let cpsAndTimes = []; // Array to store CPs and their solve times
     let isSessionRunning = false;
     let sessionCount = 0; // Variable to store the session count
     const maxSessionCount = 3; // Maximum number of iterations for a session
@@ -115,6 +129,7 @@
     // Function to handle the session button click event
     function handleSessionButtonClick() {
       if (sessionButton.textContent === 'Begin') {
+        cpsAndTimes = []; // Reset the array
         sessionButton.textContent = 'End';
         // Code to start a session goes here
         console.log('Session started!');
@@ -128,7 +143,15 @@
         startButton.disabled = true; // disable the Start button
         isSessionRunning = false;
         document.removeEventListener('keydown', handleSpacebarEvent);
+        // Create and display a table of CPs and their solve times
+        let resultsHTML = '<table><tr><th>CP</th><th>Time (seconds)</th></tr>';
+          cpsAndTimes.forEach(item => {
+            resultsHTML += `<tr><td>${item.cp}</td><td>${item.time}</td></tr>`;
+          });
+          resultsHTML += '</table>';
+          document.body.innerHTML += resultsHTML;
       }
+      sessionButton.blur();
     }
 
     // Function to handle the button click event
@@ -143,6 +166,11 @@
         const currentTime = new Date().getTime();
         const elapsedTimeInSeconds = Math.floor((currentTime - startTime) / 1000);
         elapsedTime.textContent = `Total Elapsed Time: ${elapsedTimeInSeconds} seconds`;
+        // Store the CP and its solve time in the array
+        cpsAndTimes.push({
+          cp: textField.value,
+          time: elapsedTimeInSeconds
+        });
         sessionCount++;
       if (sessionCount >= maxSessionCount) {
         sessionCount = 0;
