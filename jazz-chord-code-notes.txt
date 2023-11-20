@@ -1,0 +1,142 @@
+11/19/23
+	We have the nice beginnings of an effective chord practice app for zig zag chords.
+
+	Features to add:
+		A Session
+		Randomly display a key that applies to each iteration or the Session as a whole.
+		Display the results of a session at the end of a session.
+		Write out a log of all sessions to a file.
+
+	We want to add the idea of a session. My prompts:
+		I would like to add the concept of a 'session' to this program. A 'session' is defined as some number of iterations through the program. E.g., iterating through the Start/Stop cycle 10 times.
+
+		Ok, now I want to be able to begin and end a session with a button click. This should be a new button, with the label "Begin" displayed before a session starts, and "End" after the session starts. The button should be placed above the Start/Stop button.
+
+	We added vars to keep track of number of iterations through a session and the count of sessions.
+	We increment this in stopTimer(), but I'm not sure if that's the right place to do it. 
+		Perhaps that should happen in the calling function, handleButtonClick()?
+			Let's try that.
+
+11/20/23
+	We've fallen into the age-old trap of losing track of the control flow through the app.
+	Let's get serious about debugging in VSCode and document the control flow.
+
+	CLicking on the "Begin" button calls handleSessionButtonClick()
+		Inside we check whether we're starting or ending the session. If starting:
+			toggle isSessionRunning to "True"
+			enable the "Start" button
+
+	Then...we wait. 
+	Let's try toggling off the Session button, just to make sure that's working.
+	Again we call handleSessionButtonClick()
+		Yep, that all works. 
+
+	Let's start a new session and then Start the timer.
+	This calls handleStartButtonClick()
+		Hmmm, once we hit startTimer() it drops us to the bottom of the function. WHy is that?
+			Stepping over takes us to updateElapsedTime()
+				updateElapsedTime() is called by timerID = setInterval(). Specifically:
+					timerId = setInterval(updateElapsedTime, 1000);
+						#LEARN setInterval() method. 
+
+			So basically we just loop through updateElapsedTime() until another event happens, like...clicking the "Stop" button.
+
+		That calls handleButtonStartClick()
+			Check the state of the button's content. If "Stop" then set it to "Start"
+			Call stopTimer()
+			Get the currentTime
+			Subtract startTime from currentTime to get elapsedTime
+			Display elapsedTime.
+			We increment sessionCount...WHY?????????
+				That doesn't make any sense. Seems like we'd do that when the user clicked the "End" button for the session.
+			Let's click that button and follow the flow.	
+
+			Calls handleSessionButtonClick()
+
+		#BUG When pressing the spacebar, we still call handleStartButtonClick(), despite the session not running. We need a guardrail such that keydown events are only processed if a session is running.
+
+		How do we do that?
+			We could put a check inside the if(event.keyCode === 32) statement to see if the session is running. 
+
+			We could move the addEventListener function inside another function that's only called with the "Begin" button is pressed. That funciton is handleSessionButtonCLick().
+				We'd need to handle both cases where we add and remove the eventListener.
+
+			That seems cleaner; let's try that.
+
+
+
+
+
+This looks good. I'm using Git and Github to manage this project. I've already committed a version of this file prior to making these changes. Should I do another commit? Or should I create a new branch?
+GPT
+When deciding whether to create a new branch or commit directly to the existing branch (likely your main or development branch), it's important to consider the workflow and the nature of the changes. Here are some guidelines:
+
+Committing Directly to the Existing Branch:
+When to Use: If the changes are minor, directly related to the work you've been doing on this branch, and don't disrupt other parts of the project, you can commit directly.
+Pros: Simplicity and speed, as you don’t have to manage multiple branches.
+Cons: If the changes are significant or experimental, committing directly might risk the stability of your main or development branch.
+Creating a New Branch:
+When to Use: If the changes are substantial, experimental, or part of a new feature or fix that you want to isolate from the main development work.
+Pros: Keeps the main branch stable; allows for isolated testing and development; and facilitates code reviews and collaboration if you're working with a team.
+Cons: Requires a bit more Git management (e.g., branch creation, merging, handling potential merge conflicts).
+Recommendations for Your Case:
+Since you're making a functional change to your application (modifying how and when the spacebar event is handled), it could be a good idea to create a new branch. This approach is especially advisable if you wish to test these changes thoroughly without affecting your main development line. Here's a basic guide on how to proceed:
+
+Create a New Branch:
+
+bash
+Copy code
+git checkout -b feature/spacebar-event-update
+This creates and switches to a new branch named feature/spacebar-event-update.
+
+Make Your Changes:
+
+Implement the changes in the code as discussed.
+Commit the Changes:
+
+After testing and ensuring everything works as expected:
+bash
+Copy code
+git add .
+git commit -m "Implement conditional spacebar event handling"
+Push to GitHub (if using remote repositories):
+
+bash
+Copy code
+git push origin feature/spacebar-event-update
+Merge Back to Main Branch (after code review/testing):
+
+Once you're satisfied with the changes and they've been tested, you can merge them back into your main branch (e.g., main or develop).
+This is often done via a Pull Request (PR) on GitHub, especially in a collaborative environment.
+Conclusion:
+Creating a branch in this scenario not only follows good Git practice for feature development and bug fixes but also provides a safe environment to test changes without disrupting the main codebase. After thorough testing and potentially code review (if you're working with others), you can merge these changes back into your main branch.
+
+
+BUG
+
+The bug in your updated code is related to the way you're handling the addition and removal of the spacebar event listener (handleSpacebarEvent) within the handleSessionButtonClick function. Let's diagnose the issue:
+
+Adding the Event Listener:
+
+When the session starts (i.e., the session button is clicked and its text changes to 'End'), you correctly add the spacebar event listener.
+This part seems to be functioning as intended.
+Removing the Event Listener:
+
+When the session ends (i.e., the session button is clicked again and its text changes back to 'Begin'), you attempt to remove the spacebar event listener.
+The issue may arise here if the event listener isn't being removed as expected.
+Functionality of the Spacebar Event Listener:
+
+The handleSpacebarEvent function calls handleStartButtonClick when the spacebar is pressed. This function should only be active when a session is running.
+Considering these points, let's check a few potential causes of the bug:
+
+Event Listener Not Being Removed Properly: Ensure that the document.removeEventListener('keydown', handleSpacebarEvent); line is correctly placed and executed when the session ends.
+Incorrect Event Handling: Double-check if the handleSpacebarEvent function is being triggered even after the session has ended. This might happen if the event listener isn't properly removed.
+Session State Management: Verify that the isSessionRunning variable is being correctly set and used. This variable controls the session state and should correctly reflect whether the session is active or not.
+To further diagnose the issue, you might want to add console.log statements at key points in your code to track the execution flow and state changes. For instance, log when the event listener is added and removed, and when isSessionRunning changes.
+
+Could you specify what behavior you're observing that leads you to believe there's a bug? This will help in pinpointing the exact issue.
+
+
+
+
+
