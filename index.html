@@ -35,30 +35,37 @@
     /* Style the table so that the data for each column is center-aligned under each column heading */
     table {
       border-collapse: collapse;
-      width: 15%;
+      width: 35%;
     }
+
     th, td {
+      font-family: 'Noto Sans', sans-serif;
       text-align: center;
       padding: 8px;
     }
     tr:nth-child(even) {
       background-color: #f2f2f2;
     }
+
+    table th:first-child, table td:first-child {
+      width: 500px; /* Adjust this value as needed */
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <button id="sessionButton" class="button">Begin</button>
+    <button id="sessionButton" class="button">Begin Session</button>
     <button id="startButton" class="button">Start</button>
     <input id="textField" class="text-field" type="text" readonly>
     <div id="elapsedTime" class="elapsed-time"></div>
+    <div id="resultsContainer"></div>
   </div>
 
   <script>
     let cpsAndTimes = []; // Array to store CPs and their solve times
     let isSessionRunning = false;
     let sessionCount = 0; // Variable to store the session count
-    const maxSessionCount = 3; // Maximum number of iterations for a session
+    const maxIterations = 3; // Maximum number of iterations for a session
 
     // Get the button, text field, and elapsed time elements
     const sessionButton = document.getElementById('sessionButton');
@@ -128,7 +135,9 @@
 
     // Function to handle the session button click event
     function handleSessionButtonClick() {
-      if (sessionButton.textContent === 'Begin') {
+      if (sessionButton.textContent === 'Begin Session') {
+        // clear the results container
+        document.getElementById('resultsContainer').innerHTML = '';
         cpsAndTimes = []; // Reset the array
         sessionButton.textContent = 'End';
         // Code to start a session goes here
@@ -137,11 +146,12 @@
         startButton.disabled = false; // enable the Start button
         document.addEventListener('keydown', handleSpacebarEvent);
       } else if (sessionButton.textContent === 'End') {
-        sessionButton.textContent = 'Begin';
+        sessionButton.textContent = 'Begin Session';
         // Code to end a session goes here
         console.log('Session ended!');
         startButton.disabled = true; // disable the Start button
         isSessionRunning = false;
+        sessionCount = 0; // Reset the session count
         document.removeEventListener('keydown', handleSpacebarEvent);
         // Create and display a table of CPs and their solve times
         let resultsHTML = '<table><tr><th>CP</th><th>Time (seconds)</th></tr>';
@@ -149,8 +159,8 @@
             resultsHTML += `<tr><td>${item.cp}</td><td>${item.time}</td></tr>`;
           });
           resultsHTML += '</table>';
-          document.body.innerHTML += resultsHTML;
-      }
+          document.getElementById('resultsContainer').innerHTML = resultsHTML;
+        }
       sessionButton.blur();
     }
 
@@ -165,15 +175,15 @@
         stopTimer();
         const currentTime = new Date().getTime();
         const elapsedTimeInSeconds = Math.floor((currentTime - startTime) / 1000);
-        elapsedTime.textContent = `Total Elapsed Time: ${elapsedTimeInSeconds} seconds`;
+        elapsedTime.textContent = `Elapsed Time: ${elapsedTimeInSeconds} seconds`;
         // Store the CP and its solve time in the array
         cpsAndTimes.push({
           cp: textField.value,
           time: elapsedTimeInSeconds
         });
         sessionCount++;
-      if (sessionCount >= maxSessionCount) {
-        sessionCount = 0;
+      if (sessionCount >= maxIterations) {
+        handleSessionButtonClick();
       }
       }
     }
