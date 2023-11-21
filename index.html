@@ -65,7 +65,7 @@
     let cpsAndTimes = []; // Array to store CPs and their solve times
     let isSessionRunning = false;
     let sessionCount = 0; // Variable to store the session count
-    const maxIterations = 3; // Maximum number of iterations for a session
+    const maxIterations = 10; // Maximum number of iterations for a session
 
     // Get the button, text field, and elapsed time elements
     const sessionButton = document.getElementById('sessionButton');
@@ -112,13 +112,14 @@
     // Function to start the timer
     function startTimer() {
       startTime = new Date().getTime();
-      timerId = setInterval(updateElapsedTime, 1000);
+      timerId = setInterval(updateElapsedTime, 100);
     }
 
     // Function to update the elapsed time
     function updateElapsedTime() {
       const currentTime = new Date().getTime();
-      const elapsedTimeInSeconds = Math.floor((currentTime - startTime) / 1000);
+      const elapsedTimeInMilliseconds = currentTime - startTime;
+      const elapsedTimeInSeconds = (elapsedTimeInMilliseconds / 1000).toFixed(1);
       elapsedTime.textContent = `Elapsed Time: ${elapsedTimeInSeconds} seconds`;
     }
 
@@ -138,6 +139,9 @@
       if (sessionButton.textContent === 'Begin Session') {
         // clear the results container
         document.getElementById('resultsContainer').innerHTML = '';
+        // Reset the elapsed time and CP display
+        elapsedTime.textContent = '';
+        textField.value = '';
         cpsAndTimes = []; // Reset the array
         sessionButton.textContent = 'End';
         // Code to start a session goes here
@@ -166,7 +170,7 @@
 
     // Function to handle the button click event
     function handleStartButtonClick() {
-      if (startButton.textContent === 'Start') {
+       if (startButton.textContent === 'Start') {
         startButton.textContent = 'Stop';
         textField.value = concatenateTwoStrings();
         startTimer();
@@ -174,8 +178,8 @@
         startButton.textContent = 'Start';
         stopTimer();
         const currentTime = new Date().getTime();
-        const elapsedTimeInSeconds = Math.floor((currentTime - startTime) / 1000);
-        elapsedTime.textContent = `Elapsed Time: ${elapsedTimeInSeconds} seconds`;
+        const elapsedTimeInMilliseconds = currentTime - startTime;
+      const elapsedTimeInSeconds = (elapsedTimeInMilliseconds / 1000).toFixed(1);
         // Store the CP and its solve time in the array
         cpsAndTimes.push({
           cp: textField.value,
@@ -185,6 +189,11 @@
       if (sessionCount >= maxIterations) {
         handleSessionButtonClick();
       }
+      // add a short delay before allowing the next iteration to start
+      startButton.disabled = true;
+      setTimeout(() => {
+        startButton.disabled = false;
+      }, 50);
       }
     }
 
