@@ -87,7 +87,8 @@
     function concatenateTwoStrings() {
       const stringSet = ['SS1', 'SS2'];
       const roots = ['R/1', 'R/2', 'R/3', 'R/4', 'R/5'];
-
+      const musicalKeys = ['C', 'D', 'E', 'F', 'G', 'A', 'B,', 'Db', 'Eb', 'F', 'Gb', 'Ab', 'Bb', 'C#', 'D#', 'F#', 'G#', 'A#'];
+      const chosenKey = chooseRandomString(musicalKeys);
       let chosenString, chosenRoot;
       do {
         chosenString = chooseRandomString(stringSet);
@@ -106,7 +107,10 @@
       }
       lastTwoStrings.push(chosenString + ' ' + chosenRoot);
 
-      return chosenString + ' ' + chosenRoot;
+      return {
+        cp: chosenString + ' ' + chosenRoot,
+        key: chosenKey
+      }
     }
 
     // Function to start the timer
@@ -158,9 +162,9 @@
         sessionCount = 0; // Reset the session count
         document.removeEventListener('keydown', handleSpacebarEvent);
         // Create and display a table of CPs and their solve times
-        let resultsHTML = '<table><tr><th>CP</th><th>Time (seconds)</th></tr>';
+        let resultsHTML = '<table><tr><th>CP</th><th>Key</th><th>Time (seconds)</th></tr>';
           cpsAndTimes.forEach(item => {
-            resultsHTML += `<tr><td>${item.cp}</td><td>${item.time}</td></tr>`;
+            resultsHTML += `<tr><td>${item.cp}</td><td>${item.key}</td><td>${item.time}</td></tr>`;
           });
           resultsHTML += '</table>';
           document.getElementById('resultsContainer').innerHTML = resultsHTML;
@@ -170,19 +174,27 @@
 
     // Function to handle the button click event
     function handleStartButtonClick() {
-       if (startButton.textContent === 'Start') {
+      if (startButton.textContent === 'Start') {
+         const cpData = concatenateTwoStrings();
         startButton.textContent = 'Stop';
-        textField.value = concatenateTwoStrings();
+        textField.value = cpData.cp + "  " + cpData.key;
         startTimer();
+        startButton.dataset.cp = cpData.cp;
+        startButton.dataset.key = cpData.key; // Store the CP and its key in the dataset
+      
       } else if (startButton.textContent === 'Stop') {
         startButton.textContent = 'Start';
         stopTimer();
         const currentTime = new Date().getTime();
         const elapsedTimeInMilliseconds = currentTime - startTime;
       const elapsedTimeInSeconds = (elapsedTimeInMilliseconds / 1000).toFixed(1);
-        // Store the CP and its solve time in the array
+      const cp = startButton.dataset.cp;
+      const key = startButton.dataset.key;  
+      
+      // Store the CP and its solve time in the array
         cpsAndTimes.push({
-          cp: textField.value,
+          cp: cp,
+          key: key,
           time: elapsedTimeInSeconds
         });
         sessionCount++;
