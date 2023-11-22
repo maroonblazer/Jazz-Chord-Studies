@@ -6,6 +6,16 @@
 		Randomly display a key that applies to each iteration or the Session as a whole.
 		Display the results of a session at the end of a session.
 		Write out a log of all sessions to a file.
+		A sorting option, to display the results sorted by time (longest to shortest)
+		How could I ask/answer some useful questions about this exercise?
+			? Which CP takes the longest? 
+			? Which Key takes the longest?
+			? Which CP takes the shortest?
+			? For a given CP and Key how has elapsed time changed over time.
+				We'd need to record a timestamp for each iteration.
+
+			
+
 
 	We want to add the idea of a session. My prompts:
 		I would like to add the concept of a 'session' to this program. A 'session' is defined as some number of iterations through the program. E.g., iterating through the Start/Stop cycle 10 times.
